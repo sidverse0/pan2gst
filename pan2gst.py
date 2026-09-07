@@ -39,16 +39,6 @@ def pretty_response(data, status_code=200):
     )
     return response
 
-def validate_pan(pan_number):
-    """Validate PAN number format"""
-    pan_number = pan_number.strip().upper()
-    if len(pan_number) != 10:
-        return False
-    # Basic PAN format: 5 letters, 4 digits, 1 letter
-    import re
-    pan_pattern = r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$'
-    return bool(re.match(pan_pattern, pan_number))
-
 @app.route('/', methods=['GET'])
 def base_url():
     """Base URL endpoint showing usage information"""
@@ -76,16 +66,6 @@ def get_gst_details(pan_number):
         # Clean and validate PAN number
         pan_number = pan_number.strip().upper()
         current_time = get_ist_time()
-        
-        if not validate_pan(pan_number):
-            data = {
-                "pan": pan_number,
-                "success": False,
-                "timestamp": current_time,
-                "credit": "sidverseapi",
-                "message": "Invalid PAN number format. PAN should be 10 characters (5 letters, 4 digits, 1 letter)"
-            }
-            return pretty_response(data, 400)
         
         # Make API call to MastersIndia GST API
         params = {"keyword": pan_number}
@@ -131,7 +111,7 @@ def get_gst_details(pan_number):
                 "success": False,
                 "timestamp": current_time,
                 "credit": "sidverseapi",
-                "message": f"External API error: {response.status_code}"
+                "message": f"NO DATA FOUND: {response.status_code}"
             }
             return pretty_response(data, response.status_code)
             
@@ -164,7 +144,7 @@ def get_gst_details(pan_number):
             "success": False,
             "timestamp": current_time,
             "credit": "sidverseapi",
-            "message": f"Internal server error: {str(e)}"
+            "message": f"NO DATA FOUND: {str(e)}"
         }
         return pretty_response(data, 500)
 
